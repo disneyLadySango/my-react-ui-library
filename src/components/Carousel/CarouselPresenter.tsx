@@ -58,34 +58,47 @@ const StyledNextButtonWrapper = styled(StyledButtonWrapper)`
   transform: translateY(-50%);
   right: 5px;
 `
-const StyledCarouselDotListWrapper = styled.div`
+const StyledCarouselDotListContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 5px;
-  width: 80px;
+  bottom: 0;
+  width: 100%;
 `
-const animationDotSlide = (fromTranslate: number, toTranslate: number) =>
-  keyframes({
-    from: { transform: `translateX(${fromTranslate})` },
-    to: { transform: `translateX(${toTranslate}%)` },
-  })
 
+const StyledCarouselDotListWrapper = styled.div`
+  display: flex;
+  max-width: 80px;
+  padding-bottom: 12px;
+  overflow: hidden;
+`
+const animationDotSlide = (from: number, to: number) =>
+  keyframes({
+    from: { transform: `translateX(${from}px)` },
+    to: { transform: `translateX(${to}px)` },
+  })
 const StyledCarouselDotList = styled.ul<{
   isChange: boolean
   duration: number
-  toTranslate: number
+  from: number
+  to: number
 }>`
   display: flex;
   flex-direction: row;
-  align-items: center;
-  margin: 0 auto;
+  align-items: flex-end;
+  justify-content: center;
+  margin: 0;
   padding: 0;
-  overflow: hidden;
+  list-style-type: none;
+  ${props =>
+    css`
+      transform: translateX(${props.to}px);
+    `}
   ${props =>
     props.isChange &&
     css`
-      animation: ${animationDotSlide(0, props.toTranslate)};
+      animation: ${animationDotSlide(props.from, props.to)};
       animation-fill-mode: forwards;
       animation-duration: ${props.duration || 500}ms;
     `}
@@ -96,8 +109,8 @@ type CarouselProps = {
   duration: number
   toTranslate: number
   dotTranslate: {
-    toTranslate: number
-    fromTranslate: number
+    from: number
+    to: number
   }
   onClickBack: (event: React.MouseEvent<HTMLButtonElement>) => void
   onClickNext: (event: React.MouseEvent<HTMLButtonElement>) => void
@@ -130,15 +143,17 @@ export const Carousel: VFC<CarouselProps> = ({
       <StyledNextButtonWrapper onClick={onClickNext}>
         <ImCircleRight size="22px" color="#C5C5C5" />
       </StyledNextButtonWrapper>
-      <StyledCarouselDotListWrapper>
-        <StyledCarouselDotList
-          isChange={isDotChange}
-          duration={500}
-          {...dotTranslate}
-        >
-          {dotChildren}
-        </StyledCarouselDotList>
-      </StyledCarouselDotListWrapper>
+      <StyledCarouselDotListContainer>
+        <StyledCarouselDotListWrapper>
+          <StyledCarouselDotList
+            isChange={isDotChange}
+            duration={500}
+            {...dotTranslate}
+          >
+            {dotChildren}
+          </StyledCarouselDotList>
+        </StyledCarouselDotListWrapper>
+      </StyledCarouselDotListContainer>
     </StyledCarouselListWrapper>
   </StyledCarousel>
 )

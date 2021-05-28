@@ -30,7 +30,6 @@ const DotList: VFC<DotListProps> = ({ currentPage, lastIndex, onClickDot }) => {
     () => new Array(lastIndex + 1).fill('dot'),
     [lastIndex],
   )
-  console.log(dotItems.map(_ => 'test'))
   const children = useMemo(
     () =>
       dotItems.map((_, index) => (
@@ -41,7 +40,6 @@ const DotList: VFC<DotListProps> = ({ currentPage, lastIndex, onClickDot }) => {
       )),
     [currentPage, dotItems, onClickDot],
   )
-  console.log(children)
   return <>{children}</>
 }
 

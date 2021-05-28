@@ -6,19 +6,39 @@ const tranlateParam = {
 }
 
 const defaultDotTranslate = {
-  fromTranslate: 0,
-  toTranslate: 100
+  from: 0,
+  to: 0,
+} as const
+type DotTranslate = {
+  from: number
+  to: number
 }
-
-const createDotTranslate = (currentPage: number, lastIndex: number, newPage: number) => {
-  if (lastIndex <= 5) return defaultDotTranslate
-  // 80px === 100%
-  // 最大の%値
-  const maxValue = (lastIndex / 5) * 100
-  // 現在の%値は
-  
-  console.log(currentPage, newPage)
-  return { ...defaultDotTranslate, toTranlate: maxValue }
+const baseTranslatePixel = -16
+const createDotTranslate = (
+  currentPage: number,
+  lastIndex: number,
+  newPage: number,
+) => {
+  const lastPage = lastIndex + 1
+  const baseTranslate = lastPage - 5
+  if (baseTranslate <= 0) return defaultDotTranslate
+  const taranslate = {} as DotTranslate
+  const lastTranslateIndex = lastPage - 2
+  if (currentPage <= 2) {
+    taranslate.from = defaultDotTranslate.from
+  } else if (lastTranslateIndex <= currentPage) {
+    taranslate.from = baseTranslate * baseTranslatePixel
+  } else {
+    taranslate.from = (currentPage - 2) * baseTranslatePixel
+  }
+  if (newPage <= 2) {
+    taranslate.to = defaultDotTranslate.to
+  } else if (lastTranslateIndex <= newPage) {
+    taranslate.to = baseTranslate * baseTranslatePixel
+  } else {
+    taranslate.to = (newPage - 2) * baseTranslatePixel
+  }
+  return taranslate
 }
 
 const setBackPage = (currentPage: number, lastIndex: number) =>
@@ -49,13 +69,15 @@ export const useCarousel = (lastIndex: number, duration: DurationType) => {
     setNextPage(currentPage, lastIndex),
   ])
   // dotのアニメーション
-  const [dotTranslate, setDotTranslate] = useState(defaultDotTranslate)
+  const [dotTranslate, setDotTranslate] =
+    useState<DotTranslate>(defaultDotTranslate)
 
   const onChangePage = useCallback(
     (page: number): void => {
       // 変更中は何も受け付けない
       if (isChange) return undefined
       setIsChange(true)
+      setDotTranslate(createDotTranslate(currentPage, lastIndex, page))
       setTimeout(() => {
         const backPage = setBackPage(page, lastIndex)
         const nextPage = setNextPage(page, lastIndex)
@@ -65,7 +87,7 @@ export const useCarousel = (lastIndex: number, duration: DurationType) => {
       }, duration)
       return undefined
     },
-    [isChange, duration, lastIndex],
+    [isChange, duration, currentPage, lastIndex],
   )
 
   const onClickNext = useCallback(
@@ -104,7 +126,10 @@ export const useCarousel = (lastIndex: number, duration: DurationType) => {
     [currentPage, duration, lastIndex, onChangePage, renderPages],
   )
 
-  const isDotChange = useMemo(() => isChange && lastIndex >= 5, [isChange, lastIndex])
+  const isDotChange = useMemo(
+    () => isChange && lastIndex >= 5,
+    [isChange, lastIndex],
+  )
 
   return [
     {
